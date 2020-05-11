@@ -462,8 +462,8 @@ var page = {
   },
 
   getWindowSize: function() {
-    var docWidth = document.width;
-    var docHeight = document.height;
+    var docWidth = document.documentElement.width;
+    var docHeight = document.documentElement.height;
     if (page.isGMailPage()) {
       var frame = document.getElementById('canvas_frame');
       docHeight = frame.contentDocument.height;
@@ -485,8 +485,8 @@ var page = {
         'height': page.endY - page.startY,
         'visibleWidth': document.documentElement.clientWidth,
         'visibleHeight': document.documentElement.clientHeight,
-        'docWidth': document.width,
-        'docHeight': document.height
+        'docWidth': document.documentElement.width,
+        'docHeight': document.documentElement.height
       })}, 100);
   },
 
@@ -505,7 +505,9 @@ var page = {
   * Load the screenshot area interface
   */
   createSelectionArea: function() {
+    console.log(document.documentElement.offsetHeight);
     var areaProtector = $('sc_drag_area_protector');
+
     var zoom = page.getZoomLevel();
     var bodyStyle = window.getComputedStyle(document.body, null);
     if ('relative' == bodyStyle['position']) {
@@ -515,9 +517,9 @@ var page = {
       areaProtector.style.left =  - parseInt(page.marginLeft) + 'px';
     }
     areaProtector.style.width =
-      Math.round((document.width + parseInt(page.marginLeft)) / zoom) + 'px';
+      Math.round((document.documentElement.width + parseInt(page.marginLeft)) / zoom) + 'px';
     areaProtector.style.height =
-      Math.round((document.height + parseInt(page.marginTop)) / zoom) + 'px';
+      Math.round((document.documentElement.scrollHeight + parseInt(page.marginTop)) / zoom) + 'px';
     areaProtector.onclick = function() {
       event.stopPropagation();
       return false;
@@ -657,8 +659,8 @@ var page = {
           var width = 0;
           var height = 0;
           var zoom = page.getZoomLevel();
-          var viewWidth = Math.round(document.width / zoom);
-          var viewHeight = Math.round(document.height / zoom);
+          var viewWidth = Math.round(document.documentElement.width / zoom);
+          var viewHeight = Math.round(document.documentElement.height / zoom);
           if (xPosition > viewWidth) {
             xPosition = viewWidth;
           } else if (xPosition < 0) {
@@ -721,7 +723,7 @@ var page = {
         }
         var crop = document.getElementById('sc_drag_crop');
         var cancel = document.getElementById('sc_drag_cancel');
-        if (event.pageY + 25 > document.height) {
+        if (event.pageY + 25 > document.documentElement.height) {
           crop.style.bottom = 0;
           cancel.style.bottom = 0
         } else {

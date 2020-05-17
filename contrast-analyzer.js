@@ -101,17 +101,24 @@ var photoshop = {
     highlightType: 'border',
     highlightMode: 'rectangle',
     text: '',
+    scrollBarWidth: 12,
     i18nReplace: i18nReplace,
     initCanvas: function() {
-        $('canvas').width = $('mask-canvas').width = $('photo').style.width =
+        var $canvas = $('canvas');
+        var $maskCanvas = $('mask-canvas')
+        var $photo = $('photo');
+        $canvas.width = $maskCanvas.width = $('photo').style.width =
                 photoshop.canvas.width = bg.screenshot.canvas.width;
-        $('canvas').height = $('mask-canvas').height = $('photo').style.height =
+        $canvas.height = $maskCanvas.height = $('photo').style.height =
                 photoshop.canvas.height = bg.screenshot.canvas.height;
         var context = photoshop.canvas.getContext('2d');
         context.drawImage(bg.screenshot.canvas, 0, 0);
-        context = $('canvas').getContext('2d');
+        context = $canvas.getContext('2d');
         context.drawImage(photoshop.canvas, 0, 0);
-        $('canvas').style.display = 'block';
+
+        $photo.style.width = (bg.screenshot.canvas.width / window.devicePixelRatio) + 'px';
+        $photo.style.height = (bg.screenshot.canvas.height / window.devicePixelRatio) + 'px';
+        $canvas.style.display = 'block';
     },
     init: function() {
         var isMac = bg.screenshot.isThisPlatform('mac');

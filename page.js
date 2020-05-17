@@ -32,7 +32,8 @@ var page = {
   marginLeft: 0,
   modifiedBottomRightFixedElements: [],
   originalViewPortWidth: document.documentElement.clientWidth,
-  defaultScrollBarWidth: 17, // Default scroll bar width on windows platform.
+  defaultScrollBarWidth: 15, // Default scroll bar width on windows platform.
+  devicePixelRatio: window.devicePixelRatio,
 
   hookBodyScrollValue: function(needHook) {
     document.documentElement.setAttribute(
@@ -335,7 +336,7 @@ var page = {
         case 'show_selection_area': page.showSelectionArea(); return true;break;
         case 'scroll_init': // Capture whole page.
           response(page.scrollInit(0, 0, document.body.scrollWidth,
-              document.body.scrollHeight, 'captureWhole'));
+              document.body.scrollHeight, 'captureWhole',page.devicePixelRatio));
           return true;
           break;
         case 'scroll_next':
@@ -349,8 +350,8 @@ var page = {
               page.startX, page.startY,
               page.calculateSizeAfterZooming(page.endX - page.startX),
               page.calculateSizeAfterZooming(page.endY - page.startY),
-              'captureSelected'));
-          //return true;
+              'captureSelected',page.devicePixelRatio));
+          return true;
           break;
       }
       return true;
@@ -367,7 +368,7 @@ var page = {
   /**
   * Initialize scrollbar position, and get the data browser
   */
-  scrollInit: function(startX, startY, canvasWidth, canvasHeight, type) {
+  scrollInit: function(startX, startY, canvasWidth, canvasHeight, type, density) {
     this.hookBodyScrollValue(true);
     page.captureHeight = canvasHeight;
     page.captureWidth = canvasWidth;
@@ -406,7 +407,8 @@ var page = {
       'canvasHeight': canvasHeight,
       'scrollXCount': 0,
       'scrollYCount': 0,
-      'zoom': page.getZoomLevel()
+      'zoom': page.getZoomLevel(),
+      'density': density
     };
   },
 
@@ -418,6 +420,7 @@ var page = {
       page.scrollXCount++;
       page.scrollYCount = 0;
     }
+
     if (page.scrollXCount * page.visibleHeight < page.captureHeight) {
       this.restoreBottomRightOfFixedPositionElements();
       var viewPortSize = page.getViewPortSize();
@@ -443,6 +446,7 @@ var page = {
       }
       var x = page.scrollXCount;
       var y = page.scrollYCount;
+
       page.scrollYCount++;
       return { msg: 'scroll_next_done',scrollXCount: x, scrollYCount: y };
     }  else {
@@ -471,7 +475,8 @@ var page = {
     }
     return {'msg':'capture_window',
             'docWidth': docWidth,
-            'docHeight': docHeight};
+            'docHeight': docHeight,
+            'density': page.devicePixelRatio};
   },
 
   getSelectionSize: function() {
@@ -486,7 +491,8 @@ var page = {
         'visibleWidth': document.documentElement.clientWidth,
         'visibleHeight': document.documentElement.clientHeight,
         'docWidth': document.documentElement.width,
-        'docHeight': document.documentElement.height
+        'docHeight': document.documentElement.height,
+        'density': page.devicePixelRatio
       })}, 100);
   },
 
@@ -505,7 +511,6 @@ var page = {
   * Load the screenshot area interface
   */
   createSelectionArea: function() {
-    console.log(document.documentElement.offsetHeight);
     var areaProtector = $('sc_drag_area_protector');
 
     var zoom = page.getZoomLevel();

@@ -16,9 +16,11 @@ var screenshot = {
     visibleHeight: 0,
     scrollXCount: 0,
     scrollYCount: 0,
-    scrollBarX: 17,
-    scrollBarY: 17,
+    scrollBarX: 15,
+    scrollBarY: 15,
     captureStatus: true,
+    density: 1,
+    isFirstScroll: true,
     handleHotKey: function(keyCode) {
         if (HotKey.isEnabled()) {
             switch (keyCode) {
@@ -115,7 +117,7 @@ var screenshot = {
     onResponseVisibleSize: function(response) {
         switch (response.msg) {
         case 'capture_window':
-            screenshot.captureVisible(response.docWidth, response.docHeight);
+            screenshot.captureVisible(response.docWidth, response.docHeight, response.density);
             break;
         case 'scroll_init_done':
             screenshot.startX = response.startX, screenshot.startY = response.startY, screenshot.scrollX = response.scrollX, screenshot.scrollY = response.scrollY, screenshot.canvas.width = response.canvasWidth;
@@ -125,6 +127,7 @@ var screenshot = {
             screenshot.docWidth = response.docWidth;
             screenshot.docHeight = response.docHeight;
             screenshot.zoom = response.zoom;
+            screenshot.density = response.density;
             setTimeout("screenshot.captureAndScroll()", 100);
             break;
         case 'scroll_next_done':
@@ -192,7 +195,7 @@ var screenshot = {
             image.src = data;
         });
     },
-    captureVisible: function(docWidth, docHeight) {
+    captureVisible: function(docWidth, docHeight, density) {
         var formatParam = localStorage.screenshootQuality || 'png';
         chrome.tabs.captureVisibleTab(
         null, {
@@ -201,8 +204,8 @@ var screenshot = {
         }, function(data) {
             var image = new Image();
             image.onload = function() {
-                var width = image.height < docHeight ? image.width - 17 : image.width;
-                var height = image.width < docWidth ? image.height - 17 : image.height;
+                var width = image.height - screenshot.scrollBarY < docHeight ? image.width - screenshot.scrollBarY : image.width - screenshot.scrollBarY;
+                var height = image.width - screenshot.scrollBarX < docWidth ? image.height - screenshot.scrollBarX : image.height - screenshot.scrollBarX;
                 screenshot.canvas.width = width;
                 screenshot.canvas.height = height;
                 var context = screenshot.canvas.getContext("2d");
@@ -225,12 +228,22 @@ var screenshot = {
             var image = new Image();
             image.onload = function() {
                 var context = screenshot.canvas.getContext('2d');
+                var density = screenshot.density;
+                // We only scale our context once on the first scroll
+
+                if(screenshot.isFirstScroll) {
+                    context.scale(1/density, 1/density);
+                    screenshot.isFirstScroll = false;
+                }
+
                 var width = 0;
                 var height = 0; // Get scroll bar's width.
                 screenshot.scrollBarY = screenshot.visibleHeight < screenshot.docHeight ? 17 : 0;
                 screenshot.scrollBarX = screenshot.visibleWidth < screenshot.docWidth ? 17 : 0; // Get visible width and height of capture result.
-                var visibleWidth = (image.width - screenshot.scrollBarY < screenshot.canvas.width ? image.width - screenshot.scrollBarY : screenshot.canvas.width);
-                var visibleHeight = (image.height - screenshot.scrollBarX < screenshot.canvas.height ? image.height - screenshot.scrollBarX : screenshot.canvas.height); // Get region capture start x coordinate.
+
+                var visibleWidth = ((image.width / density) - screenshot.scrollBarY < screenshot.canvas.width ? (image.width / density) - screenshot.scrollBarY : screenshot.canvas.width);
+                var visibleHeight = ((image.height / density) - screenshot.scrollBarX < screenshot.canvas.height ? (image.height / density) - screenshot.scrollBarX : screenshot.canvas.height); // Get region capture start x coordinate.
+
                 var zoom = screenshot.zoom;
                 var x1 = screenshot.startX - Math.round(screenshot.scrollX * zoom);
                 var x2 = 0;
@@ -252,9 +265,22 @@ var screenshot = {
                 } else {
                     height = visibleHeight;
                 }
-                x2 = screenshot.scrollYCount * visibleWidth;
-                y2 = screenshot.scrollXCount * visibleHeight;
-                context.drawImage(image, x1, y1, width, height, x2, y2, width, height);
+                x2 = (screenshot.scrollYCount) * (visibleWidth);
+                y2 = (screenshot.scrollXCount) * (visibleHeight);
+
+                context.drawImage(
+                    image,
+                    x1 * density,
+                    y1 * density,
+                    width * density,
+                    height * density,
+                    x2 * density,
+                    y2 * density,
+                    width * density,
+                    height * density
+                    );
+
+
                 screenshot.sendMessage({
                     msg: 'scroll_next',
                     visibleWidth: visibleWidth,
@@ -265,6 +291,7 @@ var screenshot = {
         });
     },
     captureAndScrollDone: function() {
+        screenshot.isFirstScroll = true; // resetting flag;
         screenshot.postImage();
     },
     /**

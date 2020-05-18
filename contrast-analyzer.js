@@ -107,17 +107,20 @@ var photoshop = {
         var $canvas = $('canvas');
         var $maskCanvas = $('mask-canvas')
         var $photo = $('photo');
+
         $canvas.width = $maskCanvas.width = $('photo').style.width =
                 photoshop.canvas.width = bg.screenshot.canvas.width;
         $canvas.height = $maskCanvas.height = $('photo').style.height =
                 photoshop.canvas.height = bg.screenshot.canvas.height;
+                
+        $photo.style.width = (bg.screenshot.canvas.width / window.devicePixelRatio);
+        $photo.style.height = (bg.screenshot.canvas.height / window.devicePixelRatio);
+
         var context = photoshop.canvas.getContext('2d');
         context.drawImage(bg.screenshot.canvas, 0, 0);
         context = $canvas.getContext('2d');
         context.drawImage(photoshop.canvas, 0, 0);
-
-        $photo.style.width = (bg.screenshot.canvas.width / window.devicePixelRatio) + 'px';
-        $photo.style.height = (bg.screenshot.canvas.height / window.devicePixelRatio) + 'px';
+        
         $canvas.style.display = 'block';
     },
     init: function() {

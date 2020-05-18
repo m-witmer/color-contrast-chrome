@@ -5,20 +5,6 @@ body {
     padding: 0;
     background: #959595;
 }
-::-webkit-scrollbar {
-    height: 12px;
-    width: 12px;
-    background: #fafafa;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    -webkit-border-radius: 1ex;
-}
-
-::-webkit-scrollbar-corner {
-    background: #fafafa;
-}
 
 #header {
 
@@ -35,7 +21,7 @@ body {
     padding: 0;
     position: relative;
 }
-#canvas, #mask-canvas {
+#canvas, #mask-canvas, #contrastMask {
     width: 100%;
 }
 

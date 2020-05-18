@@ -336,7 +336,7 @@ var page = {
         case 'show_selection_area': page.showSelectionArea(); return true;break;
         case 'scroll_init': // Capture whole page.
           response(page.scrollInit(0, 0, document.body.scrollWidth,
-              document.body.scrollHeight, 'captureWhole',page.devicePixelRatio));
+              document.body.scrollHeight, 'captureWhole', page.devicePixelRatio));
           return true;
           break;
         case 'scroll_next':
@@ -368,7 +368,7 @@ var page = {
   /**
   * Initialize scrollbar position, and get the data browser
   */
-  scrollInit: function(startX, startY, canvasWidth, canvasHeight, type, density) {
+  scrollInit: function(startX, startY, canvasWidth, canvasHeight, type, pixelDensity) {
     this.hookBodyScrollValue(true);
     page.captureHeight = canvasHeight;
     page.captureWidth = canvasWidth;
@@ -408,7 +408,7 @@ var page = {
       'scrollXCount': 0,
       'scrollYCount': 0,
       'zoom': page.getZoomLevel(),
-      'density': density
+      'pixelDensity': pixelDensity
     };
   },
 
@@ -476,7 +476,7 @@ var page = {
     return {'msg':'capture_window',
             'docWidth': docWidth,
             'docHeight': docHeight,
-            'density': page.devicePixelRatio};
+            'pixelDensity': page.devicePixelRatio};
   },
 
   getSelectionSize: function() {
@@ -492,7 +492,7 @@ var page = {
         'visibleHeight': document.documentElement.clientHeight,
         'docWidth': document.documentElement.width,
         'docHeight': document.documentElement.height,
-        'density': page.devicePixelRatio
+        'pixelDensity': page.devicePixelRatio
       })}, 100);
   },
 
